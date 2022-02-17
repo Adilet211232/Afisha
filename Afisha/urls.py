@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/v1/Movie/<int:id>/',views.Movie_detail_view),
     path('api/v1/Review/',views.Review_list_view),
     path('api/v1/Review/<int:id>/',views.R_detail_view),
+    path('api/v1/Review/Movie',views.RSERA),
 ]

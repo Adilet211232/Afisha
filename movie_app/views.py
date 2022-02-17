@@ -7,6 +7,7 @@ from movie_app.models import Movie
 from movie_app.serializers import MovieSerializer
 from movie_app.serializers import Review
 from movie_app.serializers import RSerializer
+from movie_app.serializers import PSerializer
 
 
 @api_view(['GET'])
@@ -73,4 +74,10 @@ def R_detail_view(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND,
                         data={'message': 'MOvie not found'})
     data = RSerializer(name, ).data
+    return Response(data=data)
+
+@api_view(['GET'])
+def RSERA(request):
+    name = Review.objects.all()
+    data = PSerializer(name, many=True).data
     return Response(data=data)
