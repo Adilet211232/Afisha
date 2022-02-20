@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from movie_app.serializers import NameSerializer
@@ -8,6 +9,7 @@ from movie_app.serializers import MovieSerializer
 from movie_app.serializers import Review
 from movie_app.serializers import RSerializer
 from movie_app.serializers import PSerializer
+
 
 
 @api_view(['GET'])
@@ -23,61 +25,121 @@ def test(request):
     return Response(data=direktor)
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 def NAME_list_view(request):
-    name = Director.objects.all()
-    data = NameSerializer(name, many=True).data
-    return Response(data=data)
+    if request.method == 'GET':
+        name = Director.objects.all()
+        data = NameSerializer(name, many=True).data
+        return Response(data=data)
+    elif request.method == 'POST':
+        print(request.data)
+        name = request.data.get('name')
+        direk=Director.objects.create(name=name)
+        return  Response(data=NameSerializer(direk).data,
+                         status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
+@api_view(['GET','PUT','DELETE'])
 def name_detail_view(request, id):
     try:
         name = Director.objects.get(id=id)
     except Director.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND,
                         data={'message': 'Director not found'})
-    data = NameSerializer(name, ).data
-    return Response(data=data)
+    if request.method == 'GET':
+        data = NameSerializer(name, ).data
+        return Response(data=data)
+    elif request.method == 'DELETE':
+        name.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'PUT':
+        name.name = request.data.get('name')
+        name.save()
+        return  Response (data=NameSerializer(name).data)
 
 
-@api_view(['GET'])
+
+@api_view(['GET','POST'])
 def Movie_list_view(request):
-    name = Movie.objects.all()
-    data = MovieSerializer(name, many=True).data
-    return Response(data=data)
+    if request.method == 'GET':
+        name = Movie.objects.all()
+        data = MovieSerializer(name, many=True).data
+        return Response(data=data)
+    elif request.method == 'POST':
+            print(request.data)
+            title = request.data.get('title')
+            description = request.data.get('description')
+            duration = request.data.get('duration')
+            director = request.data.get('director')
+            mv= Movie.objects.create(title=title, description=description, duration=duration, director=director)
+            return  Response(data=MovieSerializer(mv).data,status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
-def Movie_detail_view(request, id):
+
+
+@api_view(['GET','PUT','DELETE'])
+def MovieDetail(request, id):
     try:
-        name = Movie.objects.get(id=id)
+        MVA = Movie.objects.get(id=id)
     except Movie.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND,
-                        data={'message': 'MOvie not found'})
-    data = MovieSerializer(name, ).data
-    return Response(data=data)
+        return Response(data='MovieNotFound')
+    if request.method == 'GET':
+        data = MovieSerializer(MVA).data
+        return Response(data=data)
+    elif request.method == 'DELETE':
+        MVA.delete()
+        return Response('no content')
+    elif request.method == 'PUT':
+        MVA.name = request.data.get('name')
+        MVA.save()
+        return Response(data=MovieSerializer(MVA).data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def Review_list_view(request):
-    name = Review.objects.all()
-    data = RSerializer(name, many=True).data
-    return Response(data=data)
+    if request.method == 'GET':
+        name = Review.objects.all()
+        data = RSerializer(name, many=True).data
+        return Response(data=data)
+    elif request.method == 'POST':
+        print(request.data)
+        text = request.data.get('text')
+        movie = request.data.get('movie')
+        star = request.data.get('star')
+        r=Review.objects.create(text=text, movie=movie, star=star)
+        return Response(data=RSerializer(r).data,
+                        status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def R_detail_view(request, id):
+    global name
     try:
         name = Review.objects.get(id=id)
     except Review.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND,
-                        data={'message': 'MOvie not found'})
-    data = RSerializer(name, ).data
-    return Response(data=data)
+        if request.method == 'GET':
+            data = RSerializer(name).data
+            return Response(data=data)
+        elif request.method == 'DELETE':
+            name.delete()
+            return Response('no content')
+        elif request.method == 'PUT':
+            name.name = request.data.get('name')
+            name.save()
+        return Response(data=RSerializer(name).data)
+
 
 @api_view(['GET'])
 def RSERA(request):
     name = Review.objects.all()
     data = PSerializer(name, many=True).data
     return Response(data=data)
+
+
+@property
+def count_reviews(self):
+    return self.reviews.all().count()
+@property
+def rating(self):
+    return Review.objects.filter(product=self).aggregate(Avg('star'))
+
