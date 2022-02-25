@@ -5,7 +5,6 @@ from movie_app.models import Movie
 from movie_app.models import Review
 
 
-
 class NameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Director
@@ -40,4 +39,18 @@ class Meta:
     fields = ['average_score']
 
 
+class DirectorСreqteUpdateSrializer(serializers.Serializer):
+    name = serializers.CharField()
 
+
+class MovieCreateUpdateSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    description = serializers.CharField()
+    duration = serializers.TimeField()
+    director = serializers.IntegerField()
+
+
+class ReviewCreateUpdateSerialiser(serializers.Serializer):
+    text = serializers.CharField()
+    movie = serializers.CharField()
+    stars = serializers.IntegerField(default=5)
