@@ -9,6 +9,8 @@ from movie_app.serializers import MovieSerializer,DirectorСreqteUpdateSrializer
 from movie_app.serializers import Review
 from movie_app.serializers import RSerializer
 from movie_app.serializers import PSerializer
+from  rest_framework.authtoken.models import Token
+from  rest_framework import permissions
 
 
 
@@ -69,12 +71,15 @@ def name_detail_view(request, id):
 
 @api_view(['GET','POST'])
 def Movie_list_view(request):
+    permission_classes = [permissions.IsAuthenticated]
     if request.method == 'GET':
         name = Movie.objects.all()
         data = MovieSerializer(name, many=True).data
+
         return Response(data=data)
     elif request.method == 'POST':
             serializer = MovieCreateUpdateSerializer(data=request.data)
+
             if not serializer.is_valid():
                 return Response(data={'errors': serializer.errors},
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -83,6 +88,7 @@ def Movie_list_view(request):
             description = request.data.get('description')
             duration = request.data.get('duration')
             director = request.data.get('director')
+
             mv= Movie.objects.create(title=title, description=description, duration=duration, director=director)
             return  Response(data=MovieSerializer(mv).data,status=status.HTTP_201_CREATED)
 
@@ -165,4 +171,28 @@ def count_reviews(self):
 @property
 def rating(self):
     return Review.objects.filter(product=self).aggregate(Avg('star'))
+from  django.contrib.auth import  authenticate
 
+@api_view(['POST'])
+def authorization(request):
+    if request.method == 'POST':
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username = username, password=password)
+        if user:
+            try:
+                token = Token.objects.get(user = user)
+            except Token.DoesNotExist:
+                token = Token.objects.create(user=user)
+            return  Response(data={'key':token.key})
+        return Response(data={'error':'User not found'},
+                        status=status.HTTP_404_NOT_FOUND)
+from django.contrib.auth.models import User
+@api_view(['POST'])
+def registration(request):
+    if request.method == 'POST':
+        username = request.data.get('username')
+        password = request.data.get('password')
+        User.objects.create_user(username=username, password=password)
+        return Response(data={'message': 'User created!'},
+                        status=status.HTTP_201_CREATED)
