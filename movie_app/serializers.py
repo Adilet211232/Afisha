@@ -1,8 +1,10 @@
-import instance as instance
+from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from movie_app.models import Director
 from movie_app.models import Movie
 from movie_app.models import Review
+from django.contrib.auth.models import User
+
 
 
 class NameSerializer(serializers.ModelSerializer):
@@ -54,3 +56,16 @@ class ReviewCreateUpdateSerialiser(serializers.Serializer):
     text = serializers.CharField()
     movie = serializers.CharField()
     stars = serializers.IntegerField(default=5)
+
+class UserCreateSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate_username(self, username):
+        if User.objects.filter(username=username):
+            raise ValueError('polzd sush.')
+        return username
+
+class AuthorizationSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
