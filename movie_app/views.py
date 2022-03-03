@@ -44,7 +44,7 @@ class ReListCreateAPIView(ListCreateAPIView):
     serializer_class = RSerializer
 
 
-class DirecUpdateDeleteApiv(DirectorСreqteUpdateSrializer, ABC):
+class DirectorUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Director.objects.all()
     serializer_class = NameSerializer
     lookup_field = 'id'
@@ -56,9 +56,10 @@ class MovieListDeleteUpdateAPIView(RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-class ReviewListCreateAPIView(ListCreateAPIView):
+class ReviewListUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = RSerializer
+    lookup_field = 'id'
 
 
 # @api_view(['GET','POST'])
